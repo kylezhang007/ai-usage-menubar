@@ -8,9 +8,7 @@ A native macOS menu bar app that shows how much of your Claude and Codex
 quota is left, plus this month's API spend, in a panel inspired by Control Center
 and Apple's activity rings.
 
-<img src="docs/screenshots/panel.png" width="560" alt="The AI Usage panel: Claude and Codex rings on the left, API spend on the right, floating as separate Liquid Glass tiles">
-
-<img src="docs/screenshots/menubar.png" width="360" alt="Menu bar showing an orange Claude ring and a green Codex ring with the percent left">
+<img src="docs/screenshots/panel.png" width="640" alt="The AI Usage panel: Claude and Codex rings on the left, API spend on the right, floating as separate Liquid Glass tiles">
 
 SwiftUI · macOS 14+ · Liquid Glass on macOS 26 · Universal (Apple Silicon + Intel)
 
