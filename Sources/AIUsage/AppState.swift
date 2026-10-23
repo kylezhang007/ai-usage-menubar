@@ -35,6 +35,7 @@ final class AppState: ObservableObject {
         refreshMinutes = saved > 0 ? saved : 3
         language = Language.current
         clearGlass = UserDefaults.standard.object(forKey: "clearGlass") as? Bool ?? true
+        Keychain.migrateLegacyItems()
         scheduleTimer()
         Task { await refresh() }
     }

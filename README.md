@@ -85,6 +85,11 @@ regular keys can't read billing. DeepSeek only exposes a balance, so that's what
 Keys and tokens stay in the macOS Keychain on your Mac. The app only talks to
 Anthropic, OpenAI, ChatGPT and DeepSeek, and nothing is sent anywhere else.
 
+Keychain items are read and written through Apple's `/usr/bin/security` tool, the same
+way Claude Code stores its login. Because the app isn't signed with a developer ID, this
+keeps macOS from asking for your password after every update. The trade-off: other
+programs running as you can read these items through the same tool without a prompt.
+
 ## Build
 
 ```bash
