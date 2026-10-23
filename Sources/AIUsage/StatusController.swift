@@ -84,7 +84,7 @@ final class StatusController: NSObject {
         guard !shown.isEmpty else {
             button.attributedTitle = NSAttributedString()
             button.image = Self.ringImage(progress: 0, color: nil)
-            button.toolTip = "AI 用量"
+            button.toolTip = L("AI 用量", "AI Usage")
             return
         }
 
@@ -101,7 +101,7 @@ final class StatusController: NSObject {
                                             attributes: [.font: font, .foregroundColor: NSColor.labelColor]))
         }
         button.attributedTitle = title
-        button.toolTip = shown.map { "\($0.0) 5 小时剩余 \(Int($0.1.rounded()))%" }.joined(separator: "\n")
+        button.toolTip = shown.map { L("\($0.0) 5 小时剩余 \(Int($0.1.rounded()))%", "\($0.0): \(Int($0.1.rounded()))% of 5-hour limit left") }.joined(separator: "\n")
     }
 
     @objc func toggle() {

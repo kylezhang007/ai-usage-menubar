@@ -40,6 +40,7 @@ The whole app is one small panel, so every detail of it was designed rather than
   provider, each filled by the 5-hour quota you have left, with the percent next to it.
 - **Follows the system.** Light and dark mode, Reduce Transparency, and a
   Standard / Clear glass setting.
+- **English and Chinese.** The UI follows your system language, or pick one in Settings.
 - **A friendly line on top.** A greeting that changes with the time of day and
   with how much quota you have left.
 
@@ -129,5 +130,6 @@ plan limits come from endpoints those apps use internally, so they may change wi
 - **对齐**：百分比用等宽数字，倒计时用等宽字体和固定格式（`4h05m`、`5d03h`），每一列上下对齐。
 - **状态栏**：两个彩色小圆环，分别显示 Claude 和 Codex 5 小时额度还剩多少。
 - **跟随系统**：浅色、深色模式，「降低透明度」设置，以及「标准 / 通透」两种玻璃效果。
+- **中英双语**：界面语言跟随系统，也可以在设置里切换中文或 English。
 
 安装、数据来源和编译方法见上面的英文部分。

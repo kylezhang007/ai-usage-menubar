@@ -2,11 +2,27 @@ import Foundation
 
 /// One rate-limit window, e.g. Claude's 5-hour window or Codex's weekly window.
 struct UsageWindow: Identifiable, Equatable {
-    var id: String { label }
-    var label: String
+    enum Kind: Equatable {
+        case fiveHour, week, opus, sonnet, hours(Int), days(Int)
+    }
+
+    var id: String { String(describing: kind) }
+    var kind: Kind
     var percent: Double          // 0...100
     var resetsAt: Date?
     var isShort: Bool            // short windows show "h:mm left", long ones show a weekday
+
+    /// Built at display time so switching languages relabels existing data.
+    var label: String {
+        switch kind {
+        case .fiveHour: return L("5 小时", "5-hour")
+        case .week: return L("本周", "Weekly")
+        case .opus: return "Opus"
+        case .sonnet: return "Sonnet"
+        case .hours(let h): return L("\(h) 小时", "\(h)-hour")
+        case .days(let d): return L("\(d) 天", "\(d)-day")
+        }
+    }
 
     /// The panel and menu bar both show what's left, matching how Codex reports it.
     var remaining: Double { max(0, 100 - percent) }
@@ -47,10 +63,10 @@ enum FetchError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .http(401), .http(403): return "Key 无效或没有权限"
-        case .http(429), .rateLimited: return "请求太频繁，稍后再试"
-        case .http(let code): return "请求失败（\(code)）"
-        case .badResponse: return "返回的数据看不懂"
+        case .http(401), .http(403): return L("Key 无效或没有权限", "Invalid key or no access")
+        case .http(429), .rateLimited: return L("请求太频繁，稍后再试", "Rate limited, retrying later")
+        case .http(let code): return L("请求失败（\(code)）", "Request failed (\(code))")
+        case .badResponse: return L("返回的数据看不懂", "Unexpected response")
         case .message(let m): return m
         }
     }
@@ -70,9 +86,9 @@ enum HTTP {
     }
 
     static func describe(_ error: Error) -> String {
-        if let e = error as? FetchError { return e.errorDescription ?? "出错了" }
-        if (error as NSError).domain == NSURLErrorDomain { return "网络连接失败" }
-        return "出错了"
+        if let e = error as? FetchError { return e.errorDescription ?? L("出错了", "Something went wrong") }
+        if (error as NSError).domain == NSURLErrorDomain { return L("网络连接失败", "No connection") }
+        return L("出错了", "Something went wrong")
     }
 }
 

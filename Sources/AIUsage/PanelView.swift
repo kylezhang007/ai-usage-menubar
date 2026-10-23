@@ -51,7 +51,7 @@ struct PanelView: View {
 
     private var footer: some View {
         HStack(spacing: 8) {
-            Button { state.showingSettings = true } label: { chip(Text("设置")) }
+            Button { state.showingSettings = true } label: { chip(Text(L("设置", "Settings"))) }
             Spacer()
             Button {
                 Task { await state.refresh() }
@@ -61,8 +61,8 @@ struct PanelView: View {
                     .animation(state.isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default,
                                value: state.isRefreshing))
             }
-            .help("立即刷新")
-            Button { NSApp.terminate(nil) } label: { chip(Text("退出")) }
+            .help(L("立即刷新", "Refresh now"))
+            Button { NSApp.terminate(nil) } label: { chip(Text(L("退出", "Quit"))) }
         }
         .buttonStyle(.plain)
     }
@@ -84,17 +84,19 @@ struct PanelView: View {
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        let hello = h < 5 ? "夜深了" : h < 11 ? "早上好" : h < 13 ? "中午好" : h < 19 ? "下午好" : "晚上好"
+        let hello = h < 5 ? L("夜深了", "Up late") : h < 11 ? L("早上好", "Good morning")
+            : h < 13 ? L("中午好", "Good noon") : h < 19 ? L("下午好", "Good afternoon") : L("晚上好", "Good evening")
         let p = state.highestPercent
-        let mood = p >= 90 ? "额度快用完了" : p >= 70 ? "额度用得差不多了" : "额度还很充足"
-        return "\(hello)，\(mood)"
+        let mood = p >= 90 ? L("额度快用完了", "almost out of quota")
+            : p >= 70 ? L("额度用得差不多了", "quota is running low") : L("额度还很充足", "plenty of quota left")
+        return L("\(hello)，\(mood)", "\(hello), \(mood)")
     }
 
     private var updatedText: String {
-        guard let d = state.lastUpdated else { return "正在读取…" }
-        if Date().timeIntervalSince(d) < 60 { return "刚刚更新" }
+        guard let d = state.lastUpdated else { return L("正在读取…", "Loading…") }
+        if Date().timeIntervalSince(d) < 60 { return L("刚刚更新", "Just updated") }
         let f = RelativeDateTimeFormatter()
-        f.locale = Locale(identifier: "zh_CN")
+        f.locale = Language.locale
         f.unitsStyle = .short
         return f.localizedString(for: d, relativeTo: Date())
     }
@@ -159,11 +161,11 @@ struct PlanTile: View {
                     }
                 }
             case .idle:
-                StatusLine(text: "正在读取…")
+                StatusLine(text: L("正在读取…", "Loading…"))
             case .missing(let m), .failed(let m):
                 StatusLine(text: m)
             case .loaded:
-                StatusLine(text: "暂时没有额度数据")
+                StatusLine(text: L("暂时没有额度数据", "No limit data yet"))
             }
         }
     }
@@ -187,7 +189,7 @@ struct UsageRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             HStack(spacing: 7) {
                 Circle().fill(shade.gradient).frame(width: 6, height: 6)
-                Text(window.label + "剩余")
+                Text(L(window.label + "剩余", window.label + " left"))
             }
             .font(.system(size: 12))
             .foregroundStyle(.secondary)
@@ -261,7 +263,7 @@ struct APITile: View {
                 Spacer(minLength: 12)
                 cell(state.openAI, "OpenAI", 1)
                 Spacer(minLength: 12)
-                cell(state.deepSeek, "DeepSeek 余额", 2)
+                cell(state.deepSeek, L("DeepSeek 余额", "DeepSeek balance"), 2)
                 Spacer(minLength: 4)
             }
             .frame(maxHeight: .infinity)
@@ -269,7 +271,10 @@ struct APITile: View {
     }
 
     private var monthLabel: String {
-        "\(Calendar.current.component(.month, from: Date())) 月"
+        let f = DateFormatter()
+        f.locale = Language.locale
+        f.dateFormat = Language.isChinese ? "M 月" : "MMM"
+        return f.string(from: Date())
     }
 
     private func cell(_ data: Loadable<Money>, _ caption: String, _ i: Int) -> some View {
@@ -284,7 +289,7 @@ struct APITile: View {
             if case .failed(let m) = data {
                 Text(m).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(2)
             } else if case .missing = data {
-                Text("在设置里填写").font(.system(size: 10)).foregroundStyle(.tertiary)
+                Text(L("在设置里填写", "Add in Settings")).font(.system(size: 10)).foregroundStyle(.tertiary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

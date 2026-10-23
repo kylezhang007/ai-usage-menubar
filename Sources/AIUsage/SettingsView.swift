@@ -10,9 +10,9 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("设置").font(.system(size: 17, weight: .semibold))
+                Text(L("设置", "Settings")).font(.system(size: 17, weight: .semibold))
                 Spacer()
-                Button("完成") { save() }
+                Button(L("完成", "Done")) { save() }
                     .buttonStyle(.plain)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(SectionTheme.api.shade(0).gradient)
@@ -23,8 +23,9 @@ struct SettingsView: View {
 
             Tile(theme: .claude) {
                 TileHeader(title: "Claude", plan: nil, theme: .claude)
-                KeyField(title: "claude.ai sessionKey（可选）", placeholder: "sk-ant-sid01-…", text: $sessionKey)
-                Hint("登录过 Claude Code 命令行的 Mac 会自动读取，不用填。没有的话，在浏览器打开 claude.ai，从 Cookie 里复制 sessionKey。")
+                KeyField(title: L("claude.ai sessionKey（可选）", "claude.ai sessionKey (optional)"), placeholder: "sk-ant-sid01-…", text: $sessionKey)
+                Hint(L("登录过 Claude Code 命令行的 Mac 会自动读取，不用填。没有的话，在浏览器打开 claude.ai，从 Cookie 里复制 sessionKey。",
+                       "Read automatically if you've logged in to the Claude Code CLI. Otherwise, copy the sessionKey cookie from claude.ai in your browser."))
             }
 
             Tile(theme: .api) {
@@ -32,28 +33,38 @@ struct SettingsView: View {
                 KeyField(title: "Anthropic Admin Key", placeholder: "sk-ant-admin01-…", text: $anthropic)
                 KeyField(title: "OpenAI Admin Key", placeholder: "sk-admin-…", text: $openAI)
                 KeyField(title: "DeepSeek API Key", placeholder: "sk-…", text: $deepSeek)
-                Hint("Key 只保存在这台 Mac 的钥匙串里。查花费需要 Admin Key，普通 Key 查不了。")
+                Hint(L("Key 只保存在这台 Mac 的钥匙串里。查花费需要 Admin Key，普通 Key 查不了。",
+                       "Keys stay in this Mac's Keychain. Spend needs an Admin key; regular keys can't read billing."))
             }
 
             Tile(theme: .codex) {
-                TileHeader(title: "通用", plan: nil, theme: .codex)
-                Row("刷新间隔") {
+                TileHeader(title: L("通用", "General"), plan: nil, theme: .codex)
+                Row(L("刷新间隔", "Refresh every")) {
                     Picker("", selection: $state.refreshMinutes) {
-                        ForEach([1, 3, 5, 10, 30], id: \.self) { Text("\($0) 分钟").tag($0) }
+                        ForEach([1, 3, 5, 10, 30], id: \.self) { Text(L("\($0) 分钟", "\($0) min")).tag($0) }
                     }
                     .labelsHidden()
                     .frame(width: 110)
                 }
-                Row("玻璃效果") {
+                Row(L("玻璃效果", "Glass")) {
                     Picker("", selection: $state.clearGlass) {
-                        Text("标准").tag(false)
-                        Text("通透").tag(true)
+                        Text(L("标准", "Standard")).tag(false)
+                        Text(L("通透", "Clear")).tag(true)
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     .frame(width: 120)
                 }
-                Row("开机自动启动") {
+                Row(L("语言", "Language")) {
+                    Picker("", selection: $state.language) {
+                        Text(L("跟随系统", "System")).tag(Language.system)
+                        Text("中文").tag(Language.chinese)
+                        Text("English").tag(Language.english)
+                    }
+                    .labelsHidden()
+                    .frame(width: 110)
+                }
+                Row(L("开机自动启动", "Open at login")) {
                     Toggle("", isOn: Binding(get: { state.launchAtLogin }, set: { state.launchAtLogin = $0 }))
                         .toggleStyle(.switch)
                         .controlSize(.small)

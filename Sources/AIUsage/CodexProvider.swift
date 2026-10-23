@@ -49,7 +49,7 @@ enum CodexProvider {
     private static func fetchFromLogs() -> Loadable<PlanUsage> {
         let sessions = home.appendingPathComponent("sessions")
         guard FileManager.default.fileExists(atPath: sessions.path) else {
-            return .missing("这台 Mac 上还没用过 Codex")
+            return .missing(L("这台 Mac 上还没用过 Codex", "Codex hasn't been used on this Mac"))
         }
         for file in recentRollouts(in: sessions).prefix(8) {
             if let limits = latestRateLimits(in: file) {
@@ -60,7 +60,7 @@ enum CodexProvider {
                 if !windows.isEmpty { return .loaded(PlanUsage(plan: plan, windows: windows)) }
             }
         }
-        return .missing("用一次 Codex 后就会显示额度")
+        return .missing(L("用一次 Codex 后就会显示额度", "Use Codex once to see your limits"))
     }
 
     private static func window(_ any: Any?, fallbackShort: Bool) -> UsageWindow? {
@@ -76,15 +76,15 @@ enum CodexProvider {
             resets = nil
         }
         let short = minutes.map { $0 <= 24 * 60 } ?? fallbackShort
-        let label: String
+        let kind: UsageWindow.Kind
         switch minutes {
-        case .some(300): label = "5 小时"
-        case .some(10080): label = "本周"
-        case .some(let m) where m < 24 * 60: label = "\(Int(m / 60)) 小时"
-        case .some(let m): label = "\(Int(m / 1440)) 天"
-        case .none: label = fallbackShort ? "5 小时" : "本周"
+        case .some(300): kind = .fiveHour
+        case .some(10080): kind = .week
+        case .some(let m) where m < 24 * 60: kind = .hours(Int(m / 60))
+        case .some(let m): kind = .days(Int(m / 1440))
+        case .none: kind = fallbackShort ? .fiveHour : .week
         }
-        return UsageWindow(label: label, percent: pct, resetsAt: resets, isShort: short)
+        return UsageWindow(kind: kind, percent: pct, resetsAt: resets, isShort: short)
     }
 
     private static func recentRollouts(in dir: URL) -> [URL] {

@@ -12,7 +12,7 @@ enum ClaudeProvider {
         do {
             return Result(usage: try await load(sessionKey: sessionKey))
         } catch FetchError.rateLimited(let after) {
-            return Result(usage: .failed("请求太频繁，稍后再试"), retryAfter: after ?? 600)
+            return Result(usage: .failed(L("请求太频繁，稍后再试", "Rate limited, retrying later")), retryAfter: after ?? 600)
         } catch {
             return Result(usage: .failed(HTTP.describe(error)))
         }
@@ -48,10 +48,12 @@ enum ClaudeProvider {
 
         guard let sessionKey, !sessionKey.isEmpty else {
             if cli != nil {
-                return .missing(renewFailed ? "Claude Code 登录已失效，在终端运行 claude 重新登录"
-                                            : "Claude Code 登录已过期，在终端运行一次 claude 即可")
+                return .missing(renewFailed ? L("Claude Code 登录已失效，在终端运行 claude 重新登录",
+                                                          "Claude Code login expired. Run claude in Terminal to log in again")
+                                            : L("Claude Code 登录已过期，在终端运行一次 claude 即可",
+                                                "Claude Code login expired. Run claude once in Terminal"))
             }
-            return .missing("在设置里填写 claude.ai 的 sessionKey")
+            return .missing(L("在设置里填写 claude.ai 的 sessionKey", "Log in to Claude Code, or add a claude.ai sessionKey in Settings"))
         }
 
         do {
@@ -60,7 +62,7 @@ enum ClaudeProvider {
             let json = try await HTTP.json(req)
             return .loaded(PlanUsage(plan: plan, windows: parseWindows(json)))
         } catch FetchError.http(let code) where code == 401 || code == 403 {
-            return .failed("sessionKey 已失效，请重新复制")
+            return .failed(L("sessionKey 已失效，请重新复制", "sessionKey expired. Copy a new one"))
         }
     }
 
@@ -68,16 +70,16 @@ enum ClaudeProvider {
 
     static func parseWindows(_ json: Any) -> [UsageWindow] {
         guard let dict = json as? [String: Any] else { return [] }
-        func window(_ key: String, _ label: String, short: Bool) -> UsageWindow? {
+        func window(_ key: String, _ kind: UsageWindow.Kind, short: Bool) -> UsageWindow? {
             guard let w = dict[key] as? [String: Any], let pct = doubleValue(w["utilization"]) else { return nil }
-            return UsageWindow(label: label, percent: pct, resetsAt: parseISODate(w["resets_at"] as? String), isShort: short)
+            return UsageWindow(kind: kind, percent: pct, resetsAt: parseISODate(w["resets_at"] as? String), isShort: short)
         }
         var result: [UsageWindow] = []
-        if let w = window("five_hour", "5 小时", short: true) { result.append(w) }
-        if let w = window("seven_day", "本周", short: false) { result.append(w) }
-        if let w = window("seven_day_opus", "Opus", short: false) {
+        if let w = window("five_hour", .fiveHour, short: true) { result.append(w) }
+        if let w = window("seven_day", .week, short: false) { result.append(w) }
+        if let w = window("seven_day_opus", .opus, short: false) {
             result.append(w)
-        } else if let w = window("seven_day_sonnet", "Sonnet", short: false) {
+        } else if let w = window("seven_day_sonnet", .sonnet, short: false) {
             result.append(w)
         }
         return result
@@ -210,7 +212,7 @@ enum ClaudeProvider {
         input.fileHandleForWriting.write(Data(command.utf8))
         try input.fileHandleForWriting.close()
         p.waitUntilExit()
-        guard p.terminationStatus == 0 else { throw FetchError.message("写回钥匙串失败") }
+        guard p.terminationStatus == 0 else { throw FetchError.message(L("写回钥匙串失败", "Couldn't save to Keychain")) }
     }
 
     private static func runSecurity(_ args: [String]) -> String? {

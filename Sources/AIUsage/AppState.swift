@@ -19,6 +19,10 @@ final class AppState: ObservableObject {
         didSet { UserDefaults.standard.set(clearGlass, forKey: "clearGlass") }
     }
 
+    @Published var language: Language {
+        didSet { UserDefaults.standard.set(language.rawValue, forKey: "language") }
+    }
+
     private var timer: Timer?
     // Claude's usage endpoint rate-limits hard, so it's polled at most every few minutes
     // and backs off when told to; the last good numbers stay on screen meanwhile.
@@ -29,6 +33,7 @@ final class AppState: ObservableObject {
     init() {
         let saved = UserDefaults.standard.integer(forKey: "refreshMinutes")
         refreshMinutes = saved > 0 ? saved : 3
+        language = Language.current
         clearGlass = UserDefaults.standard.object(forKey: "clearGlass") as? Bool ?? true
         scheduleTimer()
         Task { await refresh() }

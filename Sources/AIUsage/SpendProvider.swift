@@ -3,7 +3,7 @@ import Foundation
 /// Month-to-date API spend (Anthropic, OpenAI) and DeepSeek balance.
 enum SpendProvider {
     static func anthropic(key: String?) async -> Loadable<Money> {
-        guard let key, !key.isEmpty else { return .missing("未设置") }
+        guard let key, !key.isEmpty else { return .missing(L("未设置", "Not set")) }
         do {
             var total = 0.0
             var page: String?
@@ -33,7 +33,7 @@ enum SpendProvider {
     }
 
     static func openAI(key: String?) async -> Loadable<Money> {
-        guard let key, !key.isEmpty else { return .missing("未设置") }
+        guard let key, !key.isEmpty else { return .missing(L("未设置", "Not set")) }
         do {
             var total = 0.0
             var page: String?
@@ -62,7 +62,7 @@ enum SpendProvider {
     }
 
     static func deepSeekBalance(key: String?) async -> Loadable<Money> {
-        guard let key, !key.isEmpty else { return .missing("未设置") }
+        guard let key, !key.isEmpty else { return .missing(L("未设置", "Not set")) }
         do {
             var req = URLRequest(url: URL(string: "https://api.deepseek.com/user/balance")!)
             req.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
